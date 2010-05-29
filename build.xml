@@ -15,6 +15,7 @@
   <property name="build" location="classes"/>
   <property name="test-classes" location="test-classes"/>
   <property name="dist" location="dist"/>
+  <property name="android-sdk-location" location="/home/thomas/sources/android-sdk-linux_86"/>
 
   <!-- version related properties -->
   <property file="${cljsrc}/clojure/version.properties"/>
@@ -66,6 +67,7 @@
     <tstamp/>
     <mkdir dir="${build}"/>
   	<antcall target="init-version"/>
+        <antcall target="copy-dx-files"/>
   </target>
 
   <target name="init-version">
@@ -77,17 +79,19 @@
   	    works only on linux.-->
   	<chmod file="pom.xml" perm="ugo-w"/>
   </target>
+  <target name="copy-dx-files">
+    <unjar src="${android-sdk-location}/platforms/android-8/tools/lib/dx.jar" dest="${build}"/>
+  </target>
 
   <target name="compile-java" depends="init"
           description="Compile Java sources.">
-    <javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes"
-           debug="true" target="1.5"/>
+    <javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes" classpath="${android-sdk-location}/platforms/android-8/android.jar:${build}" debug="true" target="1.5"/>
   </target>
 
   <target name="compile-clojure" depends="compile-java"
           description="Compile Clojure sources.">
     <java classname="clojure.lang.Compile"
-          classpath="${build}:${cljsrc}"
+          classpath="${build}:${cljsrc}:${android-sdk-location}/platforms/android-8/android.jar"
           failonerror="true">
       <sysproperty key="clojure.compile.path" value="${build}"/>
       <!-- <sysproperty key="clojure.compile.warn-on-reflection" value="true"/> -->

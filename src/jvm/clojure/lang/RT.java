@@ -418,16 +418,44 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 	if(!loaded && dexURL != null && RT.booleanCast(clojure.lang.Compiler.ANDROID.deref())) {
 		String name = (scriptbase.replace('/', '.') + LOADER_SUFFIX);
 		Log.d("Clojure",  "Trying to load " + name + " out of " + dexURL);
-		DexClassLoader dx = new DexClassLoader(dexfile, 
+		DexClassLoader dx = new DexClassLoader(dexURL.toString(), 
 						       "/data/clojure", null, baseLoader());
 		try
 			{
-				loaded = (Class.forName(name, true, dx) != null);
+				Var.pushThreadBindings(
+						       RT.map(CURRENT_NS, CURRENT_NS.deref(),
+							      WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+				// Class.forName(name, false, dx);
+				//loaded = (Class.forName(name, true, dx) != null);
+				loaded = (dx.loadClass(name) != null);
 			}
 		catch(ClassNotFoundException e)
 			{
-				loaded = null;
+				Log.d("Clojure",  "Load failed: Class not found.");
+				loaded = false;
 			}
+
+		if(!loaded) {
+			name = (scriptbase.replace('/', '.') + LOADER_SUFFIX);
+			Log.d("Clojure",  "Trying to load with " + name + " instead");
+			try
+				{
+					Var.pushThreadBindings(
+							       RT.map(CURRENT_NS, CURRENT_NS.deref(),
+								      WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+					loaded = (dx.loadClass(name) != null);
+					// Class.forName(name, false, dx);
+					// loaded = (Class.forName(name, true, dx) != null);
+				}
+			catch(ClassNotFoundException e)
+				{
+					Log.d("Clojure",  "Load failed: Class not found.");
+					loaded = false;
+				}
+		}
+		if(!loaded)
+			Log.d("Clojure",  "DEX load failed.");
+
         }
 	if(!loaded && cljURL != null) {
 		if(booleanCast(Compiler.COMPILE_FILES.deref()))

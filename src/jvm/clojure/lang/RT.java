@@ -385,7 +385,7 @@ static public void load(String scriptbase) throws Exception{
 	load(scriptbase, true);
 }
 
-static public void load(String scriptbase, boolean failIfNotFound) throws Exception{
+static public void load(String scriptbase, boolean failIfNotFound) throws Exception {
 	String classfile = scriptbase + LOADER_SUFFIX + ".class";
 	String cljfile = scriptbase + ".clj";
         String dexfile = scriptbase.replace('/','.') + ".dex";
@@ -420,9 +420,16 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 		Log.d("Clojure",  "Trying to load " + name + " out of " + dexURL);
 		DexClassLoader dx = new DexClassLoader(dexfile, 
 						       "/data/clojure", null, baseLoader());
-		loaded = (Class.forName(name, true, dx) != null);
+		try
+			{
+				loaded = (Class.forName(name, true, dx) != null);
+			}
+		catch(ClassNotFoundException e)
+			{
+				loaded = null;
+			}
         }
-	else if(!loaded && cljURL != null) {
+	if(!loaded && cljURL != null) {
 		if(booleanCast(Compiler.COMPILE_FILES.deref()))
 			compile(cljfile);
 		else

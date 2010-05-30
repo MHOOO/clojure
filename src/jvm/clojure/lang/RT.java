@@ -26,6 +26,11 @@ import java.net.URL;
 import java.net.JarURLConnection;
 import java.nio.charset.Charset;
 
+// For android debug out
+import dalvik.system.DexClassLoader;
+import android.util.Log;
+import clojure.lang.Compiler;
+
 public class RT{
 
 static final public Boolean T = Boolean.TRUE;//Keyword.intern(Symbol.create(null, "t"));
@@ -383,8 +388,14 @@ static public void load(String scriptbase) throws Exception{
 static public void load(String scriptbase, boolean failIfNotFound) throws Exception{
 	String classfile = scriptbase + LOADER_SUFFIX + ".class";
 	String cljfile = scriptbase + ".clj";
+        String dexfile = scriptbase.replace('/','.') + ".dex";
 	URL classURL = baseLoader().getResource(classfile);
 	URL cljURL = baseLoader().getResource(cljfile);
+        URL dexURL = baseLoader().getResource(dexfile);
+        if(RT.booleanCast(clojure.lang.Compiler.ANDROID.deref())) {
+		Log.d("Clojure",  "(load " + scriptbase + ")");
+		Log.d("Clojure",  "DEX FILE: " + dexfile + "; DEX URL: " + dexURL);
+        }
 	boolean loaded = false;
 
 	if((classURL != null &&
@@ -393,8 +404,8 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 	   || classURL == null) {
 		try {
 			Var.pushThreadBindings(
-					RT.map(CURRENT_NS, CURRENT_NS.deref(),
-					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+					       RT.map(CURRENT_NS, CURRENT_NS.deref(),
+						      WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
 			loaded = (loadClassForName(scriptbase.replace('/', '.') + LOADER_SUFFIX) != null);
 		}
 		finally {
@@ -407,8 +418,23 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 		else
 			loadResourceScript(RT.class, cljfile);
 	}
-	else if(!loaded && failIfNotFound)
-		throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, cljfile));
+        // in case we're on android, we also look for a .dex file into
+        // the root directory which matches the package name and try
+        // to load the class from there
+        else if(!loaded && dexURL != null && RT.booleanCast(clojure.lang.Compiler.ANDROID.deref())) {
+		String name = (scriptbase.replace('/', '.') + LOADER_SUFFIX);
+		Log.d("Clojure",  "Trying to load " + name + " out of " + dexURL);
+		DexClassLoader dx = new DexClassLoader(dexfile, 
+						       "/data/clojure", null, baseLoader());
+		loaded = (Class.forName(name, true, dx) != null);
+        }
+	else if(!loaded && failIfNotFound) {
+		if(RT.booleanCast(clojure.lang.Compiler.ANDROID.deref())) 
+			throw new FileNotFoundException(String.format("Could not locate %s,%s or %s on classpath: ", classfile, cljfile, dexfile));
+		else
+			throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, cljfile));
+	}
+	
 }
 
 static void doInit() throws Exception{

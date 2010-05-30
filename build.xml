@@ -16,6 +16,7 @@
   <property name="test-classes" location="test-classes"/>
   <property name="dist" location="dist"/>
   <property name="android-sdk-location" location="/home/thomas/sources/android-sdk-linux_86"/>
+  <property name="dx" location="${android-sdk-location}/platforms/android-8/tools/dx"/>
 
   <!-- version related properties -->
   <property file="${cljsrc}/clojure/version.properties"/>
@@ -146,6 +147,218 @@
     <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}" />
   </target>
 
+  <target name="clojure.core" depends="compile-clojure"
+          description="Create clojure jar file for core system.">
+    <jar jarfile="jars/clojure.core.jar">
+      <fileset dir="${build}">
+        <include name="clojure/asm/**/*"/>
+        <include name="clojure/lang/**/*"/>
+        <include name="clojure/core/**/*"/>
+        <include name="clojure/core*.class"/>
+        <include name="clojure/genclass*.class"/>
+        <include name="clojure/gvec*.class"/>
+        <include name="clojure/version.properties"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.core.dex" />
+      <fileset dir="jars" includes="clojure.core.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.inspector" depends="compile-clojure"
+          description="Create clojure jar file for inspector system.">
+    <jar jarfile="jars/clojure.inspector.jar">
+      <fileset dir="${build}">
+        <include name="clojure/inspector/**/*"/>
+        <include name="clojure/inspector*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.inspector.dex" />
+      <fileset dir="jars" includes="clojure.inspector.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.java" depends="compile-clojure"
+          description="Create clojure jar file for java system.">
+    <jar jarfile="jars/clojure.java.jar">
+      <fileset dir="${build}">
+        <include name="clojure/java/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.java.dex" />
+      <fileset dir="jars" includes="clojure.java.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.java.io" depends="compile-clojure"
+          description="Create clojure jar file for java.io system.">
+    <jar jarfile="jars/clojure.java.io.jar">
+      <fileset dir="${build}">
+        <include name="clojure/java/io/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.java.io.dex" />
+      <fileset dir="jars" includes="clojure.java.io.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.java.browse_ui" depends="compile-clojure"
+          description="Create clojure jar file for java.browse_ui system.">
+    <jar jarfile="jars/clojure.java.browse_ui.jar">
+      <fileset dir="${build}">
+        <include name="clojure/java/browse_ui/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.java.browse_ui.dex" />
+      <fileset dir="jars" includes="clojure.java.browse_ui.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.main" depends="compile-clojure"
+          description="Create clojure jar file for main system.">
+    <jar jarfile="jars/clojure.main.jar">
+      <fileset dir="${build}">
+        <include name="clojure/main*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.main.dex" />
+      <fileset dir="jars" includes="clojure.main.jar"/>
+    </apply>
+  </target>
+  
+  <target name="clojure.pprint" depends="compile-clojure"
+          description="Create clojure jar file for pprint system.">
+    <jar jarfile="jars/clojure.pprint.jar">
+      <fileset dir="${build}">
+        <include name="clojure/pprint*.class"/>
+        <include name="clojure/pprint/**/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.pprint.dex" />
+      <fileset dir="jars" includes="clojure.pprint.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.repl" depends="compile-clojure"
+          description="Create clojure jar file for repl system.">
+    <jar jarfile="jars/clojure.repl.jar">
+      <fileset dir="${build}">
+        <include name="clojure/repl*.class"/>
+        <include name="clojure/repl/**/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.repl.dex" />
+      <fileset dir="jars" includes="clojure.repl.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.set" depends="compile-clojure"
+          description="Create clojure jar file for set system.">
+    <jar jarfile="jars/clojure.set.jar">
+      <fileset dir="${build}">
+        <include name="clojure/set*.class"/>
+        <include name="clojure/set/**/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.set.dex" />
+      <fileset dir="jars" includes="clojure.set.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.test" depends="compile-clojure"
+          description="Create clojure jar file for test system.">
+    <jar jarfile="jars/clojure.test.jar">
+      <fileset dir="${build}">
+        <include name="clojure/test*.class"/>
+        <include name="clojure/test/**/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.test.dex" />
+      <fileset dir="jars" includes="clojure.test.jar"/>
+    </apply>
+  </target>
+
+  <target name="clojure.xml" depends="compile-clojure"
+          description="Create clojure jar file for xml system.">
+    <jar jarfile="jars/clojure.xml.jar">
+      <fileset dir="${build}">
+        <include name="clojure/xml*.class"/>
+        <include name="clojure/xml/**/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.xml.dex" />
+      <fileset dir="jars" includes="clojure.xml.jar"/>
+    </apply>
+  </target>
+  
+  <target name="clojure.walk" depends="compile-clojure"
+          description="Create clojure jar file for walk system.">
+    <jar jarfile="jars/clojure.walk.jar">
+      <fileset dir="${build}">
+        <include name="clojure/walk*.class"/>
+        <include name="clojure/walk/**/*.class"/>
+      </fileset>
+    </jar>
+    <apply taskname="dx" executable="${dx}" failonerror="true" parallel="false">
+      <arg value="-JXmx2048m" />
+      <arg value="--dex" />
+      <arg value="--output=jars/clojure.walk.dex" />
+      <fileset dir="jars" includes="clojure.walk.jar"/>
+    </apply>
+  </target>
+  
+  <target name="clojure.zip" depends="compile-clojure"
+          description="Create clojure jar file for zip system.">
+    <jar jarfile="jars/clojure.zip.jar">
+      <fileset dir="${build}">
+        <include name="clojure/zip*.class"/>
+        <include name="clojure/zip/**/*.class"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="clojure.all.dex" depends="clojure.system.jars"
+          description="Create single jar with all .dex files in it.">
+    <jar jarfile="jars/clojure-all-dex.jar">
+      <fileset dir="jars">
+        <include name="*.dex"/>
+      </fileset>
+    </jar>
+  </target>
+
   <target name="test"
           description="Run clojure tests"
           depends="compile-tests">
@@ -188,9 +401,11 @@
     <copy file="${src_jar}" tofile="${src_noversion_jar}" />
   </target>
 
-  <target name="jar" depends="clojure"/>
+  <target name="clojure.system.jars" depends="clojure.core,clojure.main,clojure.set,clojure.xml,clojure.zip,clojure.inspector,clojure.walk,clojure.test,clojure.pprint,clojure.java,clojure.repl"/>
+  
+  <target name="jar" depends="clojure,clojure.system.jars"/>
 
-  <target name="all" depends="clojure,clojure-slim,clojure-sources"/>
+  <target name="all" depends="clojure,clojure-slim,clojure-sources,clojure.all.dex"/>
 
   <target name="clean"
           description="Remove autogenerated files and directories.">

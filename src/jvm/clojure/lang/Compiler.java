@@ -3727,18 +3727,24 @@ static public class ObjExpr implements Expr{
 	}
 
 	private void handleAndroid() throws Exception {
-		Log.d( "Clojure", "compiledex start");
-		String strings[] = {"--dex", 
-				    "--output=/data/clojure/classes.dex", 
-				    "/data/clojure/classes"};
+		// this code is not thread safe, a different thread
+		// may also be trying to compile something. What
+		// happens then?
+		String compiledDexFilePath = "/data/clojure/classes/" + internalName + ".dex";
+		String compiledClassFilePath = (String)COMPILE_PATH.deref() + File.separator + internalName + ".class";
+		Log.d( "Clojure", "compiledex start: " + compiledClassFilePath + " into " + compiledDexFilePath);
+		String strings[] = {"--dex",
+				    "--no-strict", // --no-strict allows us to specify the absolute path to the class file to be compiled without running into errors
+				    "--output=" + compiledDexFilePath, 
+				    compiledClassFilePath};
 		com.android.dx.command.Main.main(strings);
 		Log.d( "Clojure", "compiledex end");
     
 		//Zip up the file because the DexClassLoader requires it
 		try {
-			String dexSource = "/data/clojure/classes.dex";
+			String dexSource = compiledDexFilePath;
 			String target = "/data/clojure/classes/" 
-				+ internalName.replace('.', '/') + ".zip";
+				+ internalName.replace('.', '/') + ".apk";
 			Log.d( "Clojure", "zip target is " + target );
       
 			ZipOutputStream zos = new 
@@ -3759,8 +3765,12 @@ static public class ObjExpr implements Expr{
 			fis.close();
       
 			zos.close();
+
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			// delete the generated .dex file
+			(new File(compiledDexFilePath)).delete();
 		}
     
 		Log.d( "Clojure", "Zipdex end");
@@ -4010,13 +4020,15 @@ static public class ObjExpr implements Expr{
 
 	private void handleAndroidLoad() throws Exception {
 		String target = "/data/clojure/classes/" + 
-			internalName.replace('.', '/') + ".zip";
+			internalName.replace('.', '/') + ".apk";
 		Log.d("Clojure", "load target is " + target);
 
 		//Store class and loader refs in arrays so the can't be 
 		// garbage collected
 		dlArray[dlOffset] = new DexClassLoader(target, 
 						       "/data/clojure", null,this.getClass().getClassLoader());
+		Log.d("Clojure", "Loading class with name " + name
+);
 		clArray[dlOffset] = dlArray[dlOffset].loadClass(name);
 
 		if (clArray[dlOffset] == null)

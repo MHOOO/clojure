@@ -429,41 +429,19 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 		String name = (scriptbase.replace('/', '.') + LOADER_SUFFIX);
 		Log.d("Clojure",  "Loading " + name + " out of apk file: " + apkFilePath);
 		DexClassLoader dx = new DexClassLoader(apkFilePath.toString(), "/data/clojure", null, baseLoader());
-		try
-			{
-				Var.pushThreadBindings(
-						       RT.map(CURRENT_NS, CURRENT_NS.deref(),
-							      WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
-				Class.forName(name, false, dx); // 2.
-				loaded = (Class.forName(name, true, dx) != null); // 2.
-				// loaded = (dx.loadClass(name) != null); // 1.
-			}
-		catch(Exception// ClassNotFoundException
-		      e)
-			{
-				Log.d("Clojure",  "Load failed: Class not found.");
-				loaded = false;
-			}
-
-		if(!loaded) {
-			name = (scriptbase.replace('/', '.').replace("__init",""));
-			Log.d("Clojure",  "Trying to load with " + name + " instead");
-			try
-				{
-					Var.pushThreadBindings(
-							       RT.map(CURRENT_NS, CURRENT_NS.deref(),
-								      WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
-					// loaded = (dx.loadClass(name) != null); // 1.
-					Class.forName(name, false, dx); // 2.
-					loaded = (Class.forName(name, true, dx) != null); //2.
-				}
-			catch(Exception e// ClassNotFoundException e
-			      )
-				{
-					Log.d("Clojure",  "Load failed: Class not found.");
-					loaded = false;
-				}
+		try {
+			Var.pushThreadBindings(
+					       RT.map(CURRENT_NS, CURRENT_NS.deref(),
+						      WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+			Class.forName(name, false, dx); // 2.
+			loaded = (Class.forName(name, true, dx) != null); // 2.
+			// loaded = (dx.loadClass(name) != null); // 1.
 		}
+		catch(ClassNotFoundException e) {
+			Log.d("Clojure",  "Load failed: Class not found.");
+			loaded = false;
+		}
+
 		if(!loaded)
 			Log.d("Clojure",  "DEX load failed.");
 
@@ -485,9 +463,9 @@ static public void load(String scriptbase, boolean failIfNotFound) throws Except
 
 static void doInit() throws Exception{
 	load("clojure/core");
-	load("clojure/zip", false);
-	load("clojure/xml", false);
-	load("clojure/set", false);
+	// load("clojure/zip", false);
+	// load("clojure/xml", false);
+	// load("clojure/set", false);
 
 	Var.pushThreadBindings(
 			RT.map(CURRENT_NS, CURRENT_NS.deref(),

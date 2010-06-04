@@ -233,8 +233,8 @@ static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.
 //boolean
 //boolean True if running on Android
 static final public Var ANDROID = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-Symbol.create("*android*"), 
-System.getProperty("java.vm.vendor").equals("The Android Project")? Boolean.TRUE:Boolean.FALSE);
+					     Symbol.create("*android*"), 
+					     System.getProperty("java.vm.vendor").equals("The Android Project")? Boolean.TRUE:Boolean.FALSE);
 
 //boolean True if running on Android
 static final public Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),

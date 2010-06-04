@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Callable;
 import java.util.*;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -944,6 +945,10 @@ static public boolean booleanCast(Object x){
 	return x != null;
 }
 
+static public boolean booleanCast(boolean x){
+	return x;
+}
+
 static public byte byteCast(Object x){
 	long n = ((Number) x).longValue();
 	if(n < Byte.MIN_VALUE || n > Byte.MAX_VALUE)
@@ -1447,6 +1452,10 @@ static public void print(Object x, Writer w) throws Exception{
 		else if(x instanceof Var) {
 			Var v = (Var) x;
 			w.write("#=(var " + v.ns.name + "/" + v.sym + ")");
+		}
+		else if(x instanceof Pattern) {
+			Pattern p = (Pattern) x;
+			w.write("#\"" + p.pattern() + "\"");
 		}
 		else w.write(x.toString());
 	}

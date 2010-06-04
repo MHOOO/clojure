@@ -645,8 +645,7 @@
 
 (defn identical?
   "Tests if 2 arguments are the same object"
-  {:tag Boolean
-   :inline (fn [x y] `(. clojure.lang.Util identical ~x ~y))
+  {:inline (fn [x y] `(. clojure.lang.Util identical ~x ~y))
    :inline-arities #{2}
    :added "1.0"}
   ([x y] (clojure.lang.Util/identical x y)))
@@ -657,8 +656,7 @@
   numbers and collections in a type-independent manner.  Clojure's immutable data
   structures define equals() (and thus =) as a value, not an identity,
   comparison."
-  {:tag Boolean
-   :inline (fn [x y] `(. clojure.lang.Util equiv ~x ~y))
+  {:inline (fn [x y] `(. clojure.lang.Util equiv ~x ~y))
    :inline-arities #{2}
    :added "1.0"}
   ([x] true)
@@ -687,7 +685,7 @@
   y. Same as Java x.compareTo(y) except it also works for nil, and
   compares numbers and collections in a type-independent manner. x
   must implement Comparable"
-  {:tag Integer
+  {
    :inline (fn [x y] `(. clojure.lang.Util compare ~x ~y))
    :added "1.0"}
   [x y] (. clojure.lang.Util (compare x y)))
@@ -719,7 +717,7 @@
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 (defn zero?
   "Returns true if num is zero, else false"
-  {:tag Boolean
+  {
    :inline (fn [x] `(. clojure.lang.Numbers (isZero ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (isZero x)))
@@ -727,14 +725,14 @@
 (defn count
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings, arrays, and Java Collections and Maps"
-  {:tag Integer
+  {
    :inline (fn  [x] `(. clojure.lang.RT (count ~x)))
    :added "1.0"}
   [coll] (clojure.lang.RT/count coll))
 
 (defn int
   "Coerce to int"
-  {:tag Integer
+  {
    :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (intCast x)))
@@ -979,14 +977,14 @@
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
-  {:tag Boolean
+  {
    :inline (fn [x] `(. clojure.lang.Numbers (isPos ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (isPos x)))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
-  {:tag Boolean
+  {
    :inline (fn [x] `(. clojure.lang.Numbers (isNeg ~x)))
    :added "1.0"}
   [x] (. clojure.lang.Numbers (isNeg x)))
@@ -1170,12 +1168,14 @@
   {:added "1.0"}
   ([set] set)
   ([^clojure.lang.IPersistentSet set key]
-   (. set (disjoin key)))
+   (when set
+     (. set (disjoin key))))
   ([set key & ks]
-   (let [ret (disj set key)]
-     (if ks
-       (recur ret (first ks) (next ks))
-       ret))))
+   (when set
+     (let [ret (disj set key)]
+       (if ks
+         (recur ret (first ks) (next ks))
+         ret)))))
 
 (defn find
   "Returns the map entry for key, or nil if key not present."
@@ -2273,7 +2273,7 @@
     (let [merge-entry (fn [m e]
 			(let [k (key e) v (val e)]
 			  (if (contains? m k)
-			    (assoc m k (f (m k) v))
+			    (assoc m k (f (get m k) v))
 			    (assoc m k v))))
           merge2 (fn [m1 m2]
 		   (reduce merge-entry (or m1 {}) (seq m2)))]
@@ -2698,7 +2698,7 @@
 
 (defn boolean
   "Coerce to boolean"
-  {:tag Boolean
+  {
    :inline (fn  [x] `(. clojure.lang.RT (booleanCast ~x)))
    :added "1.0"}
   [x] (clojure.lang.RT/booleanCast x))
@@ -2919,7 +2919,7 @@
 
 (defmacro doto
   "Evaluates x then calls all of the methods and functions with the
-  value of x supplied at the from of the given arguments.  The forms
+  value of x supplied at the front of the given arguments.  The forms
   are evaluated in order.  Returns x.
 
   (doto (new java.util.HashMap) (.put \"a\" 1) (.put \"b\" 2))"
@@ -3925,7 +3925,7 @@
   {:added "1.0"}
   [v] (instance? clojure.lang.Var v))
 
-(defn subs
+(defn ^String subs
   "Returns the substring of s beginning at start inclusive, and ending
   at end (defaults to length of string), exclusive."
   {:added "1.0"}
@@ -5557,7 +5557,7 @@
      (lazy-seq
       (if-let [s (seq coll)]
         (reductions f (first s) (rest s))
-        (f))))
+        (list (f)))))
   ([f init coll]
      (cons init
            (lazy-seq
